@@ -48,19 +48,19 @@ function TooltipOptionsMenu({
   tooltipCoords,
   initPositioning,
   triangleProps,
-  ...props,
-}){
+  ...props
+}) {
   return (
-    <View style={{position: 'relative'}} onLayout={initPositioning}>
+    <View>
       {trigger(() => setMenuVisibility(!isMenuActive))}
-      {
-        isMenuActive ? ([
-          <Triangle size={10} elevetion={2} backgroundColor={props.backgroundColor} {...triangleProps}/>,
-          <TooltipWrapper elevation={3} {...tooltipCoords} {...props}>
-            {children}
-          </TooltipWrapper>,
-        ]) : null
-      }
+      {isMenuActive
+        ? [
+            <Triangle size={10} elevetion={2} backgroundColor={props.backgroundColor} {...triangleProps} />,
+            <TooltipWrapper elevation={3} {...tooltipCoords} {...props}>
+              {children}
+            </TooltipWrapper>,
+          ]
+        : null}
     </View>
   )
 }
@@ -84,7 +84,7 @@ export default compose(
   withState('layout', 'setLayout', {}),
   withState('tooltipCoords', 'setTooltipCoords', {}),
   withProps(props => ({
-    initPositioning(layoutEvent){
+    initPositioning(layoutEvent) {
       const layout = layoutEvent.nativeEvent.layout
 
       props.setTooltipCoords({
