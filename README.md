@@ -20,9 +20,9 @@ function Foo() {
     <TooltipView
       // `trigger` is what you want to be tapped by the user to toggle the tooltip visibility
       trigger={onPress => <RoundedIcon name="plus" size={20} roundSize={30} onPress={onPress} />}
-      // you can pass a optional width for the tooltip
+      // you can pass an optional width for the tooltip
       width={200}
-      // and also a optional background
+      // and also an optional background
       backgroundColor="#f9f9f9"
       // `triangleStyle`={{}} to style the little triangle
       // and any valid View props
