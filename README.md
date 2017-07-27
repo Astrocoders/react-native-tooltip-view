@@ -5,6 +5,12 @@ A dead simple tooltip view that you can populate yourself
 ```
 $ yarn add react-native-tooltip-view
 ```
+Be aware that this package depends on recompose and styled-components are peer dependencies.
+So if you aren't using them install with:
+```
+$ yarn add recompose styled-components
+```
+And you should totally give a try with those awesome packages!
 
 ## Demo
 ![alt text](https://github.com/Astrocoders/react-native-tooltip-view/raw/master/view.gif "React Native ToolTipView")
