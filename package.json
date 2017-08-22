@@ -1,6 +1,6 @@
 {
   "name": "react-native-tooltip-view",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A dead simple tooltip view that you pass your own children",
   "main": "index.js",
   "repository": "https://github.com/Astrocoders/react-native-tooltip-view.git",
