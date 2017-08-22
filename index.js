@@ -56,7 +56,7 @@ function TooltipOptionsMenu({
         ? [
             <Triangle size={10} elevation={2} backgroundColor={props.backgroundColor} {...triangleProps} />,
             <TooltipWrapper elevation={3} {...tooltipCoords} {...props}>
-              {children}
+              {children(setMenuVisibility)}
             </TooltipWrapper>,
           ]
         : null}
@@ -71,7 +71,7 @@ TooltipOptionsMenu.propTypes = {
   setMenuVisibility: PropTypes.func.isRequired,
   trigger: PropTypes.func.isRequired,
   triangleProps: PropTypes.object,
-  children: PropTypes.oneOf(PropTypes.element, PropTypes.arrayOf(PropTypes.element)),
+  children: PropTypes.func.isRequired,
 }
 
 TooltipOptionsMenu.defaultProps = {
