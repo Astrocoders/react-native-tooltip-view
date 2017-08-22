@@ -33,7 +33,9 @@ function Foo() {
       // `triangleStyle`={{}} to style the little triangle
       // and any valid View props
     >
-      // anything you want in here
+      {setMenuVisibility => (
+        // anything you want in here
+      )}
     </TooltipView>
   )
 }
