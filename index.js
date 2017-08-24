@@ -1,10 +1,10 @@
 import React from 'react'
-import { Dimensions, View } from 'react-native'
+import { Platform, Dimensions, View, Modal, InteractionManager } from 'react-native'
 import PropTypes from 'prop-types'
 import styled from 'styled-components/native'
-import { compose, pure, withState, withProps } from 'recompose'
+import { compose, pure, withStateHandlers, withHandlers } from 'recompose'
 
-const { width: windowWidth } = Dimensions.get('window')
+const WINDOW_DIMENSIONS = Dimensions.get('window')
 
 const TooltipWrapper = styled.View.attrs({
   style: {
@@ -16,15 +16,14 @@ const TooltipWrapper = styled.View.attrs({
   shadowRadius: 1.62;
   shadowOpacity: 0.1845;
   bottom: ${props => props.bottom};
+  left: ${props => props.left};
   background-color: ${props => props.backgroundColor || '#fff'};
 `
 
 const Triangle = styled.View`
   position: absolute;
-  shadowRadius: 5;
-  shadowOpacity: 0.1845;
-  left: 20;
-  top: -10;
+  bottom: ${props => props.bottom - props.size};
+  left: ${props => props.left};
   width: ${props => props.size};
   height: ${props => props.size};
   background-color: transparent;
@@ -39,27 +38,38 @@ const Triangle = styled.View`
   border-left-color: transparent;
 `
 
+const OverlayTouchable = styled.TouchableWithoutFeedback`
+  flex: 1;
+`
+
+const OverlayContentWrapper = styled.View`flex: 1;`
+
 function TooltipOptionsMenu({
   isMenuActive,
   setMenuVisibility,
+  showMenu,
+  hideMenu,
   children,
   trigger,
   tooltipCoords,
   initPositioning,
   triangleProps,
+  setWrapperRef,
   ...props
 }) {
   return (
-    <View onLayout={initPositioning}>
-      {trigger(() => setMenuVisibility(!isMenuActive))}
-      {isMenuActive
-        ? [
-            <Triangle size={10} elevation={2} backgroundColor={props.backgroundColor} {...triangleProps} />,
+    <View onLayout={initPositioning} ref={ref => setWrapperRef(ref)}>
+      <Modal visible={isMenuActive} onRequestClose={hideMenu} transparent>
+        <OverlayTouchable onPress={hideMenu}>
+          <OverlayContentWrapper>
+            <Triangle size={10} backgroundColor={props.backgroundColor} {...triangleProps} {...tooltipCoords}/>
             <TooltipWrapper elevation={3} {...tooltipCoords} {...props}>
               {children(setMenuVisibility)}
-            </TooltipWrapper>,
-          ]
-        : null}
+            </TooltipWrapper>
+          </OverlayContentWrapper>
+        </OverlayTouchable>
+      </Modal>
+      {trigger(showMenu)}
     </View>
   )
 }
@@ -79,17 +89,34 @@ TooltipOptionsMenu.defaultProps = {
 }
 
 export default compose(
-  withState('isMenuActive', 'setMenuVisibility', false),
-  withState('tooltipCoords', 'setTooltipCoords', {}),
-  withProps(props => ({
-    initPositioning(layoutEvent) {
-      const layout = layoutEvent.nativeEvent.layout
+  withStateHandlers({
+    isMenuActive: false,
+    tooltipCoords: {},
+    wrapperRef: {},
+  }, {
+    setMenuVisibility: () => value => ({ isMenuActive: value }),
+    hideMenu: () => () => ({ isMenuActive: false }),
+    showMenu: () => () => ({ isMenuActive: true }),
+    setTooltipCoords: () => tooltipCoords => ({ tooltipCoords }),
+    setWrapperRef: () => wrapperRef => ({ wrapperRef }),
+  }),
+  withHandlers({
+    initPositioning: props => layoutEvent => {
+      const { layout } = layoutEvent.nativeEvent
 
-      props.setTooltipCoords({
-        bottom: layout.height + 10,
-        width: windowWidth - layout.x - 10,
+      // If the TooltipView is used within a tabs container or a navigator
+      // with transitions we would get different values for pageX and pageY all the time.
+      // So here we ensure we are going to get our sweet values only after those transitions have ended.
+      InteractionManager.runAfterInteractions(() => {
+        props.wrapperRef.measure((x, y, width, height, pageX, pageY) => {
+          props.setTooltipCoords({
+            bottom: WINDOW_DIMENSIONS.height - (layout.height + pageY) + Platform.select({android: 0, ios: 30}),
+            left: pageX + layout.width - 10,
+            width: WINDOW_DIMENSIONS.width - layout.x - pageX - 10,
+          })
+        })
       })
     },
-  })),
+  }),
   pure,
 )(TooltipOptionsMenu)
